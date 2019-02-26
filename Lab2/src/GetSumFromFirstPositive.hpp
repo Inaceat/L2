@@ -5,7 +5,7 @@ double GetSumFromFirstPositive(std::vector<double>& vec)
 {
 	auto firstPositive = vec.begin();
 
-	while (*firstPositive <= 0)
+	while (firstPositive != vec.end() && *firstPositive <= 0)
 		++firstPositive;
 
 	double sum = 0;
