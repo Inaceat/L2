@@ -8,15 +8,13 @@
 
 class TrainStationSchedule
 {
-	TrainStationSchedule(std::string fileName)
-	{
-		
-	}
+public:
+	explicit TrainStationSchedule(std::string fileName);
 
 
-	friend std::ostream& operator<<(std::ostream& ostream, const TrainStationSchedule& item);
+	friend std::ostream& operator<<(std::ostream& ostream, const TrainStationSchedule& schedule);
 	
-	friend std::ifstream& operator>>(std::ifstream& ifstream, TrainStationSchedule& item);
+	friend std::ifstream& operator>>(std::ifstream& ifstream, TrainStationSchedule& schedule);
 	
 
 	void Save(const std::string& fileName) const;
@@ -25,6 +23,7 @@ class TrainStationSchedule
 
 	void Sort(const std::function<int(const ScheduleEntry&, const ScheduleEntry&)>& comparer);
 
+
 private:
-	std::vector<ScheduleEntry> _scheduleEntries;
+	std::vector<ScheduleEntry> _scheduleEntries{};
 };

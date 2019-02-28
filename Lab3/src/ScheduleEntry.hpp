@@ -7,27 +7,21 @@
 class ScheduleEntry
 {
 public:
-	ScheduleEntry(std::string trainID,std::string destinationStation, tm departureTime,	tm destinationArrivalTime):
-		_trainID(std::move(trainID)),
-		_destinationStation(std::move(destinationStation))
-	{
-		_departureTime = mktime(&departureTime);
-		_destinationArrivalTime = mktime(&destinationArrivalTime);
-	}
+	ScheduleEntry();
+
+	ScheduleEntry(std::string trainID, std::string destinationStation, tm departureTime, tm destinationArrivalTime);
 
 
-	std::string TrainID() const
-	{
-		return _trainID;
-	}
+	std::string TrainID() const;
 
-	std::string DestinationStation() const
-	{
-		return _destinationStation;
-	}
+	std::string DestinationStation() const;
 
 
+	friend std::ostream& operator<<(std::ostream& ostream, const ScheduleEntry& entry);
 
+	friend std::ifstream& operator>>(std::ifstream& ifstream, ScheduleEntry& entry);
+
+	std::string ToCsv() const;
 
 
 
