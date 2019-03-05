@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ScheduleEntry.hpp"
+#include <regex>
 
 
 ScheduleEntry::ScheduleEntry() :
@@ -68,4 +69,28 @@ std::string ScheduleEntry::ToCsv() const
 		std::to_string(_destinationArrivalTime);
 
 	return entryContent;
+}
+
+ScheduleEntry ScheduleEntry::TryParseCsv(std::string csvString)
+{
+	std::regex pattern(
+		"^"							//Correct ScheduleEntry data is
+		"([^,]+?),([^,]+?),"		//[one or more non-comma symbols followed by comma] twice - trainID & dest. station
+		"(\d{1,19}?),(\d{1,19}?)$"  //[one or more digit] twice - departure and arrival time
+	);
+
+	if (false == std::regex_match(csvString, pattern))
+		throw std::exception("Wrong Schedule Entry format!");
+
+
+	std::sregex_token_iterator currentMatch(csvString.begin(), csvString.end(), pattern, { 1, 2, 3, 4 });
+
+
+	ScheduleEntry result;
+	result._trainID = *currentMatch;
+	result._destinationStation = ;
+	result._departureTime = 0;
+	result._destinationArrivalTime = 0;
+
+	return result;
 }

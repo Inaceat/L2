@@ -21,8 +21,10 @@ public:
 
 	friend std::ifstream& operator>>(std::ifstream& ifstream, ScheduleEntry& entry);
 
+
 	std::string ToCsv() const;
 
+	static ScheduleEntry TryParseCsv(std::string csvString);
 
 
 private:
