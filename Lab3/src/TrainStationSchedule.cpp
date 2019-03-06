@@ -1,65 +1,100 @@
 #include "stdafx.h"
 
+#include <algorithm>
+#include <ctime>
 
 #include "TrainStationSchedule.hpp"
 
 
-
-TrainStationSchedule::TrainStationSchedule(std::string fileName) :
-	_scheduleEntries()
+TrainStationSchedule TrainStationSchedule::LoadFromCSVFile(const std::string& fileName)
 {
-	tm dep{};
-	tm arr{};
-
-	_scheduleEntries.emplace_back("N0", "D0", dep, arr);
-	_scheduleEntries.emplace_back("N1", "D0", dep, arr);
-	_scheduleEntries.emplace_back("N2", "D0", dep, arr);
-	_scheduleEntries.emplace_back("N3", "D0", dep, arr);
-	_scheduleEntries.emplace_back("N4", "D0", dep, arr);
-}
+	TrainStationSchedule readSchedule {};
 
 
+	std::ifstream fileStream(fileName);
 
-std::ostream& operator<<(std::ostream& ostream, const TrainStationSchedule& schedule)
-{
-	for (auto entry : schedule._scheduleEntries)
-		ostream << entry;
+	
 
-	return ostream;
-}
-
-std::ifstream& operator>>(std::ifstream& ifstream, TrainStationSchedule& schedule)
-{
-	ScheduleEntry readEntry;
-
-
-	while (ifstream.eof() == false)
+	ScheduleEntry readEntry {};
+	
+	while (EOF != fileStream.peek())
 	{
-		ifstream >> readEntry;
+		fileStream >> readEntry;
 
-		schedule._scheduleEntries.push_back(readEntry);
+		readSchedule._scheduleEntries.push_back(readEntry);
 	}
 
 
-	return ifstream;
-}
-TrainStationSchedule TrainStationSchedule::LoadFromFile(const std::string & fileName)
-{
-	return TrainStationSchedule();
+	return readSchedule;
 }
 
 void TrainStationSchedule::SaveAsCSV(const std::string& fileName) const
 {
+	std::ofstream writeStream(fileName, std::fstream::out);
 
+
+	for (auto entry : _scheduleEntries)
+		writeStream << entry.ToCsv() << '\n';
+
+
+	writeStream.close();
 }
+
+
+std::string UnixTimeToString(time_t unixTime, std::string format)
+{
+	tm time {};
+	gmtime_s(&time, &unixTime);
+
+
+	const auto timeBuffer = new char[50];
+
+	strftime(timeBuffer, 50, format.c_str(), &time);
+
+
+	std::string result(timeBuffer);
+
+
+	delete[] timeBuffer;
+
+	return result;
+}
+
+void TrainStationSchedule::Show() const
+{
+	std::cout << std::setw(5) << "No";
+	std::cout << std::setw(15) << "Destination";
+	std::cout << std::setw(25) << "Departure";
+	std::cout << std::setw(25) << "Dest. arrival";
+	std::cout << std::endl;
+
+	for (auto entry : _scheduleEntries)
+	{
+		std::cout << std::setw(5) << entry.TrainID();
+		std::cout << std::setw(15) << entry.DestinationStation();
+		std::cout << std::setw(25) << UnixTimeToString(entry.DepartureTime(), "%d/%m/%y %R");
+		std::cout << std::setw(25) << UnixTimeToString(entry.DestinationArrivalTime(), "%d/%m/%y %R");
+		std::cout << std::endl;
+	}
+}
+
 
 TrainStationSchedule TrainStationSchedule::Where(const std::function<bool(const ScheduleEntry&)>& selector) const
 {
-	return TrainStationSchedule();
+	TrainStationSchedule result {};
+
+	for (auto entry : _scheduleEntries)
+		if (true == selector(entry))
+			result._scheduleEntries.push_back(entry);
+
+	return result;
 }
 
-
-void TrainStationSchedule::OrderBy(const std::function<int(const ScheduleEntry&, const ScheduleEntry&)>& comparer)
+TrainStationSchedule TrainStationSchedule::OrderBy(const std::function<bool(const ScheduleEntry&, const ScheduleEntry&)>& isRightOrderComparer) const
 {
+	TrainStationSchedule result(*this);
 
+	std::sort(result._scheduleEntries.begin(), result._scheduleEntries.end(), isRightOrderComparer);
+
+	return result;
 }

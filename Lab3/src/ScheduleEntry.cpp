@@ -1,63 +1,67 @@
 #include "stdafx.h"
 
-#include "ScheduleEntry.hpp"
+
+#include <sstream>
 #include <regex>
 
 
-ScheduleEntry::ScheduleEntry() :
-	_departureTime(),
-	_destinationArrivalTime()
-{}
-
-ScheduleEntry::ScheduleEntry(std::string trainID, std::string destinationStation, tm departureTime, tm destinationArrivalTime):
-	
-	_trainID(std::move(trainID)),
-
-	_destinationStation(std::move(destinationStation)),
-	
-	_departureTime(mktime(&departureTime)),
-	
-	_destinationArrivalTime(mktime(&destinationArrivalTime))
-{}
+#include "ScheduleEntry.hpp"
 
 
 
-std::string ScheduleEntry::TrainID() const
+time_t ParseUnixTime(const std::string& str)
 {
-	return _trainID;
-}
+	std::stringstream stream;
+	
+	stream << str;
 
-std::string ScheduleEntry::DestinationStation() const
-{
-	return _destinationStation;
+
+	time_t result;
+
+	stream >> result;
+
+	return result;
 }
 
 
-
-std::ostream& operator<<(std::ostream& ostream, const ScheduleEntry& entry)
+ScheduleEntry ScheduleEntry::TryParseCsv(std::string csvString)
 {
-	ostream << "Train ID: " << entry._trainID;
-	ostream << "  Dest.: " << entry._destinationStation;
-	ostream << "  Dep. time: " << entry._departureTime;
-	ostream << "  Dest arrival: " << entry._destinationArrivalTime;
+	std::regex pattern(
+		"^"							//Correct ScheduleEntry data is
+		"([^,]+?),([^,]+?),"		//[one or more non-comma symbols followed by comma] twice - trainID & dest. station
+		"(\\d{1,19}?),(\\d{1,19}?)$"  //[one or more digit] twice - departure and arrival time
+	);
 
-	ostream << std::endl;
+	if (false == std::regex_match(csvString, pattern))
+		throw std::exception("Wrong Schedule Entry format!");
 
-	return ostream;
+
+	std::sregex_token_iterator currentMatch(csvString.begin(), csvString.end(), pattern, { 1, 2, 3, 4 });
+
+
+	ScheduleEntry result {};
+
+	result._trainID = *currentMatch++;
+	result._destinationStation = *currentMatch++;
+	result._departureTime = ParseUnixTime(*currentMatch++);
+	result._destinationArrivalTime = ParseUnixTime(*currentMatch);
+
+	return result;
 }
-
 
 std::ifstream& operator>>(std::ifstream& ifstream, ScheduleEntry& entry)
 {
+	std::string inputBuffer;
+
+	std::getline(ifstream, inputBuffer, '\n');
 
 
-	entry._trainID = "TestID";
-	entry._destinationStation = "Nowhere";
-	entry._departureTime = 15509007800;
-	entry._destinationArrivalTime = 15509752800;
+	entry = ScheduleEntry::TryParseCsv(inputBuffer);
+
 
 	return ifstream;
 }
+
 
 
 std::string ScheduleEntry::ToCsv() const
@@ -71,26 +75,24 @@ std::string ScheduleEntry::ToCsv() const
 	return entryContent;
 }
 
-ScheduleEntry ScheduleEntry::TryParseCsv(std::string csvString)
+
+
+std::string ScheduleEntry::TrainID() const
 {
-	std::regex pattern(
-		"^"							//Correct ScheduleEntry data is
-		"([^,]+?),([^,]+?),"		//[one or more non-comma symbols followed by comma] twice - trainID & dest. station
-		"(\d{1,19}?),(\d{1,19}?)$"  //[one or more digit] twice - departure and arrival time
-	);
+	return _trainID;
+}
 
-	if (false == std::regex_match(csvString, pattern))
-		throw std::exception("Wrong Schedule Entry format!");
+std::string ScheduleEntry::DestinationStation() const
+{
+	return _destinationStation;
+}
 
+time_t ScheduleEntry::DepartureTime() const
+{
+	return _departureTime;
+}
 
-	std::sregex_token_iterator currentMatch(csvString.begin(), csvString.end(), pattern, { 1, 2, 3, 4 });
-
-
-	ScheduleEntry result;
-	result._trainID = *currentMatch;
-	result._destinationStation = ;
-	result._departureTime = 0;
-	result._destinationArrivalTime = 0;
-
-	return result;
+time_t ScheduleEntry::DestinationArrivalTime() const
+{
+	return _destinationArrivalTime;
 }

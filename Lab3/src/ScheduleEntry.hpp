@@ -7,23 +7,21 @@
 class ScheduleEntry
 {
 public:
-	ScheduleEntry();
-
-	ScheduleEntry(std::string trainID, std::string destinationStation, tm departureTime, tm destinationArrivalTime);
-
-
-	std::string TrainID() const;
-
-	std::string DestinationStation() const;
-
-
-	friend std::ostream& operator<<(std::ostream& ostream, const ScheduleEntry& entry);
 
 	friend std::ifstream& operator>>(std::ifstream& ifstream, ScheduleEntry& entry);
 
 
+	
 	std::string ToCsv() const;
 
+
+	std::string TrainID() const;
+	std::string DestinationStation() const;
+	time_t DepartureTime() const;
+	time_t DestinationArrivalTime() const;
+
+
+private:
 	static ScheduleEntry TryParseCsv(std::string csvString);
 
 
