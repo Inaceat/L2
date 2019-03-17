@@ -115,11 +115,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ComplexNumber.cpp" />
     <ClCompile Include="src\WinMain.cpp" />
     <ClCompile Include="src\WndProc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
+    <ClInclude Include="src\ComplexNumber.hpp" />
     <ClInclude Include="src\WndProc.hpp" />
   </ItemGroup>
   <ItemGroup>

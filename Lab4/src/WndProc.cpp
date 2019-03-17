@@ -1,37 +1,46 @@
 #include "WndProc.hpp"
 #include "../res/resource.h"
 
-#include <iosfwd>
+#include "ComplexNumber.hpp"
+
 #include <sstream>
+#include <WinUser.h>
 
 
-int ParseInt(char* str)
+class DialogEditBox
 {
-	std::stringstream stream;
+public:
+	DialogEditBox(HWND parentWindowHandle, int editBoxResourceID)
+	{
+		_handle = GetDlgItem(parentWindowHandle, editBoxResourceID);
+	}
 
-	stream << str;
-
-
-	int result;
-
-	stream >> result;
-
-	return result;
-}
-
-std::string ToString(int i)
-{
-	std::stringstream stream;
-
-	stream << i;
+	std::string GetText() const
+	{
+		int textLength = GetWindowTextLength(_handle) + 1;
 
 
-	std::string result;
+		LPSTR text = new char[textLength];
 
-	stream >> result;
+		GetWindowText(_handle, text, textLength);
 
-	return result;
-}
+		std::string result(text, textLength);
+
+
+		delete[] text;
+
+		return result;
+	}
+
+	void SetText(std::string text)
+	{
+		SetWindowText(_handle, text.c_str());
+	}
+
+private:
+	HWND _handle;
+};
+
 
 
 
@@ -39,69 +48,32 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-
-
-
 		case WM_COMMAND:
 		
 			if (LOWORD(wParam) == IDC_BUTTON_MULTIPLY || LOWORD(wParam) == IDC_BUTTON_DIVIDE)
 			{
-				int firstReLength = GetWindowTextLength(GetDlgItem(hWnd, IDC_EDIT_FIRST_RE));
-				int firstImLength = GetWindowTextLength(GetDlgItem(hWnd, IDC_EDIT_FIRST_IM));
+				DialogEditBox firstReEditBox(hWnd, IDC_EDIT_FIRST_RE);
+				DialogEditBox firstImEditBox(hWnd, IDC_EDIT_FIRST_IM);
 
-				int secondReLength = GetWindowTextLength(GetDlgItem(hWnd, IDC_EDIT_SECOND_RE));
-				int secondImLength = GetWindowTextLength(GetDlgItem(hWnd, IDC_EDIT_SECOND_IM));
+				DialogEditBox secondReEditBox(hWnd, IDC_EDIT_SECOND_RE);
+				DialogEditBox secondImEditBox(hWnd, IDC_EDIT_SECOND_IM);
 
-
-				LPSTR firstReString = new char[firstReLength + 1];
-				firstReString[firstReLength] = '\0';
-				
-				LPSTR firstImString = new char[firstImLength + 1];
-				firstImString[firstImLength] = '\0';
+				DialogEditBox resultReEditBox(hWnd, IDC_EDIT_RESULT_RE);
+				DialogEditBox resultImEditBox(hWnd, IDC_EDIT_RESULT_IM);
 
 
-				LPSTR secondReString = new char[secondReLength + 1];
-				secondReString[secondReLength] = '\0';
+				ComplexNumber firstNumber(firstReEditBox.GetText(), firstImEditBox.GetText());
+				ComplexNumber secondNumber(secondReEditBox.GetText(), secondImEditBox.GetText());
 
-				LPSTR secondImString = new char[secondImLength + 1];
-				secondImString[secondImLength] = '\0';
-
-
-				GetWindowText(GetDlgItem(hWnd, IDC_EDIT_FIRST_RE), firstReString, firstReLength);
-				GetWindowText(GetDlgItem(hWnd, IDC_EDIT_FIRST_IM), firstImString, firstImLength);
-
-				GetWindowText(GetDlgItem(hWnd, IDC_EDIT_SECOND_RE), secondReString, secondReLength);
-				GetWindowText(GetDlgItem(hWnd, IDC_EDIT_SECOND_IM), secondImString, secondImLength);
-
-
-
-				int firstRe = ParseInt(firstReString);
-				int firstIm = ParseInt(firstImString);
-
-				int secondRe = ParseInt(secondReString);
-				int secondIm = ParseInt(secondReString);
-
-
-
-				int resultRe = 0;
-				int resultIm = 0;
+				ComplexNumber resultNumber;
 
 				if (LOWORD(wParam) == IDC_BUTTON_MULTIPLY)
-				{
-					resultRe = firstRe * secondRe - firstIm * secondIm;
-					resultIm = firstIm * secondRe + firstRe * secondIm;
-				}
+					resultNumber = firstNumber * secondNumber;
+				else
+					resultNumber = firstNumber / secondNumber;
 
-
-
-				SetWindowText(GetDlgItem(hWnd, IDC_EDIT_RESULT_RE), ToString(resultRe).c_str());
-				SetWindowText(GetDlgItem(hWnd, IDC_EDIT_RESULT_IM), ToString(resultIm).c_str());
-
-				delete[] firstReString;
-				delete[] firstImString;
-
-				delete[] secondReString;
-				delete[] secondImString;
+				resultReEditBox.SetText(resultNumber.RealToString());
+				resultImEditBox.SetText(resultNumber.ImaginaryToString());
 			}
 
 			break; 
