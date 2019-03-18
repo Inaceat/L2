@@ -12,34 +12,41 @@ T_To MagicCastTo(T_From value)
 	T_To result;
 	sstr >> result;
 
+	if (!sstr.eof() && sstr.fail())
+		throw InvalidArgumentException("Cast failed, invalid input!");
 	
 	return result;
 }
 
 
-ComplexNumber::ComplexNumber() :
+ComplexNumber::ComplexNumber()
+	:
 	_real(0),
 	_imaginary(0)
 {}
 
-ComplexNumber::ComplexNumber(double re, double im) :
+ComplexNumber::ComplexNumber(double re, double im)
+	:
 	_real(re),
 	_imaginary(im)
 {}
 
 ComplexNumber::ComplexNumber(char* re, size_t reLength, char* im, size_t imLength)
-{
-	std::string reString(re, reLength);
-	std::string imString(im, reLength);
-
-	_real = MagicCastTo<double>(reString);
-	_imaginary = MagicCastTo<double>(imString);	
-}
+	:
+	ComplexNumber(std::string(re, reLength), std::string(im, reLength))
+{}
 
 ComplexNumber::ComplexNumber(std::string re, std::string im)
 {
-	_real = MagicCastTo<double>(re);
-	_imaginary = MagicCastTo<double>(im);
+	try
+	{
+		_real = MagicCastTo<double>(re);
+		_imaginary = MagicCastTo<double>(im);
+	}
+	catch (const InvalidArgumentException& e)
+	{
+		throw;
+	}
 }
 
 

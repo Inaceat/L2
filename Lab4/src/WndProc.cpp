@@ -52,6 +52,8 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		
 			if (LOWORD(wParam) == IDC_BUTTON_MULTIPLY || LOWORD(wParam) == IDC_BUTTON_DIVIDE)
 			{
+				ShowWindow(GetDlgItem(hWnd, IDC_STATIC_ERROR_MESSAGE), SW_HIDE);
+
 				DialogEditBox firstReEditBox(hWnd, IDC_EDIT_FIRST_RE);
 				DialogEditBox firstImEditBox(hWnd, IDC_EDIT_FIRST_IM);
 
@@ -62,8 +64,21 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				DialogEditBox resultImEditBox(hWnd, IDC_EDIT_RESULT_IM);
 
 
-				ComplexNumber firstNumber(firstReEditBox.GetText(), firstImEditBox.GetText());
-				ComplexNumber secondNumber(secondReEditBox.GetText(), secondImEditBox.GetText());
+				ComplexNumber firstNumber;
+				ComplexNumber secondNumber;
+
+				try
+				{
+					firstNumber = { firstReEditBox.GetText(), firstImEditBox.GetText() };
+					secondNumber = {secondReEditBox.GetText(), secondImEditBox.GetText() };
+				}
+				catch (const InvalidArgumentException& e)
+				{
+					ShowWindow(GetDlgItem(hWnd, IDC_STATIC_ERROR_MESSAGE), SW_SHOW);
+
+					return TRUE;
+				}
+				
 
 				ComplexNumber resultNumber;
 

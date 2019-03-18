@@ -3,6 +3,22 @@
 #include <string>
 
 
+
+class InvalidArgumentException
+	:
+	public std::runtime_error
+{
+public:
+	explicit InvalidArgumentException(const std::string& message)
+		: runtime_error(message)
+	{}
+
+	explicit InvalidArgumentException(const char* message)
+		: runtime_error(message)
+	{}
+};
+
+
 class ComplexNumber
 {
 public:
