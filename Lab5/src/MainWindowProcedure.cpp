@@ -31,7 +31,10 @@ void DrawAllTheShit(HWND* hWnd, HDC* dc)
 	
 
 	//Draw things
-	
+	//Vase
+
+	//POINT vasePoints[] = {{10,100}, {100, 100}, {100, 10}, {10, 10}};
+	//Polygon(*dc, vasePoints, 4);
 }
 
 
